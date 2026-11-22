@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laboratório de Treinamento Online | Robótica Industrial</title>
+<meta name="description" content="Ambiente online de treinamento em robótica industrial: opere um robô articulado de 6 eixos por um Teach Pendant virtual.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0f14'/%3E%3Cpath d='M8 25V15l10-6 6 4' stroke='%23ff6a00' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='24' cy='13' r='3' fill='%232ee6a6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/estilo.css">
+<script src="js/config.js"></script>
+<script src="js/demo-entrada.js" defer></script>
+</head>
+<body>
+<main class="entrada">
+  <section>
+    <p class="selo">Laboratório de treinamento online</p>
+    <h1>Simulador de robô <em>industrial</em></h1>
+    <div class="chat-box">
+      <div class="chat-h"><i></i><span>Assistente de treinamento</span></div>
+      <div id="chat" role="log" aria-live="polite"></div>
+      <form id="fx" class="chat-in" novalidate>
+        <input id="resp" type="text" maxlength="60" autocomplete="off" aria-label="Sua resposta" disabled>
+        <button id="env" class="btn btn-primary" type="submit" disabled>Enviar</button>
+      </form>
+      <button id="bOk" class="btn btn-primary" type="button">OK, entendi. Ir para o treinamento</button>
+      <p class="priv">Sua participação é registrada com nome, sobrenome, data e hora.</p>
+    </div>
+  </section>
+  <div class="demo3d" id="demoBox" role="img" aria-label="Demonstração em 3D: o robô pega uma peça e a leva para outro ponto da bancada">
+    <div id="demoCv"></div>
+    <div id="demoFb" hidden>A demonstração 3D não pôde ser aberta neste navegador. O treinamento continua disponível.</div>
+    <span class="cap">O robô pega e leva a peça, sozinho</span>
+  </div>
+</main>
+<footer class="rodape">Ambiente de treinamento desenvolvido por <b>Rudson Boaris</b> · © 2026 · Todos os direitos reservados.</footer>
+<script src="js/instrucoes.js"></script>
+<script>
+(function () {
+  var chat = document.getElementById('chat'), f = document.getElementById('fx'), inp = document.getElementById('resp'), env = document.getElementById('env'), ok = document.getElementById('bOk');
+  var PEQ = ['da', 'de', 'do', 'das', 'dos', 'e'], OK = /^\p{L}[\p{L}'’ -]{1,59}$/u;
+  var reduz = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var espera = function (ms) { return new Promise(function (r) { setTimeout(r, window.__rapido || reduz ? 0 : ms); }); };
+  var ir = function (u) { (window.__ir || function (x) { location.assign(x); })(u); };
+  function limpa(t) { return String(t || '').replace(/\s+/g, ' ').trim(); }
+  function palavra(w) { return w.toLocaleLowerCase('pt-BR').replace(/(^|['’-])(\p{L})/gu, function (m, a, c) { return a + c.toLocaleUpperCase('pt-BR'); }); }
+  function bonito(t) { var p = limpa(t).split(' '); return p.map(function (w) { return p.length > 1 && PEQ.indexOf(w.toLowerCase()) >= 0 ? w.toLowerCase() : palavra(w); }).join(' '); }
+  function bolha(cls, html) { var d = document.createElement('div'); d.className = 'b ' + cls; d.innerHTML = html; chat.appendChild(d); chat.scrollTop = chat.scrollHeight; return d; }
+  function esc(t) { return String(t).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+  function ia(html) {
+    var d = bolha('ia dig', '<span></span><span></span><span></span>');
+    return espera(650).then(function () { d.className = 'b ia'; d.innerHTML = html; chat.scrollTop = chat.scrollHeight; });
+  }
+  function enviar(dados) {
+    var url = (window.CONFIG || {}).urlPlanilha;
+    if (!url) { console.warn('urlPlanilha não configurada: a entrada não foi enviada.'); return; }
+    fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(dados), keepalive: true }).catch(function () {});
+  }
+  function pronto(ph) { inp.disabled = false; env.disabled = false; inp.placeholder = ph; inp.value = ''; inp.focus(); }
+  var passo = 0, nome = '', sobrenome = '';
+  ia('Olá! Seja bem-vindo ao <b>simulador de robô industrial</b>.')
+    .then(function () { return ia('Como posso chamar você?'); })
+    .then(function () { pronto('Seu nome'); });
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = bonito(inp.value);
+    if (passo === 0) {
+      if (!OK.test(v)) { bolha('ia', 'Não consegui entender. Pode digitar só o seu nome, usando letras?'); inp.focus(); return; }
+      nome = v; passo = 1; inp.disabled = env.disabled = true; bolha('eu', esc(nome));
+      ia('Prazer, <b>' + esc(nome) + '</b>!').then(function () { return ia('Para registrar sua participação neste treinamento, qual é o seu sobrenome?'); }).then(function () { pronto('Seu sobrenome'); });
+    } else if (passo === 1) {
+      if (!OK.test(v)) { bolha('ia', 'Não consegui entender. Pode digitar o seu sobrenome, usando letras?'); inp.focus(); return; }
+      sobrenome = v; passo = 2; inp.disabled = env.disabled = true; bolha('eu', esc(sobrenome));
+      sessionStorage.setItem('treino', JSON.stringify({ nome: nome, sobrenome: sobrenome, entrada: new Date().toISOString() }));
+      enviar({ nome: nome, sobrenome: sobrenome });
+      ia('Pronto, ' + esc(nome) + '. Sua participação foi registrada.').then(function () { return ia(window.INSTRUCOES(nome)); })
+        .then(function () { f.style.display = 'none'; ok.style.display = 'block'; ok.focus(); });
+    }
+  });
+  ok.addEventListener('click', function () { ir('treinamento.html'); });
+})();
+</script>
+</body>
+</html>

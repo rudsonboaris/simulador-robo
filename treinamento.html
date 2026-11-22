@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laboratório de Treinamento Online | Robótica Industrial</title>
+<script>if(!sessionStorage.getItem('treino'))location.replace('index.html');</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0f14'/%3E%3Cpath d='M8 25V15l10-6 6 4' stroke='%23ff6a00' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='24' cy='13' r='3' fill='%232ee6a6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/estilo.css">
+<style>
+.lab-main{width:100%;max-width:1180px;margin:0 auto;padding:16px 14px 28px}
+.lab-main h1{font-size:clamp(22px,4vw,32px);margin:0 0 4px}
+.sub{color:var(--c-mut);margin:0 0 12px}
+.aviso{background:#2a2108;border:1px solid #8a6d1a;color:#f6d77a;border-radius:12px;padding:9px 14px;font-size:13px;margin-bottom:12px}
+.robo-grid{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:14px;align-items:start}
+.view{position:relative;border:1px solid var(--c-metal);border-radius:16px;overflow:hidden;background:#0b0f14;height:min(72vh,660px);min-height:420px}
+#cv{position:absolute;inset:0}#cv canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:absolute;top:8px;right:8px;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;z-index:2}
+.hud .btn{min-height:32px;padding:4px 10px;font-size:12px;background:#11161cdd}
+.hud .btn[aria-pressed="true"]{border-color:var(--c-acc);color:var(--c-acc)}
+.tip3d{position:absolute;left:10px;bottom:8px;font-size:12px;color:var(--c-mut);z-index:2;pointer-events:none}
+#vMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--c-mut);z-index:1}
+#alarm{display:none;position:absolute;left:8px;right:8px;top:48px;z-index:4;background:#b3201f;border:2px solid #ff8a8a;color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;text-align:center;animation:pisca .7s steps(2) infinite}
+#alarm.on{display:block}#alarm small{display:block;font-weight:500;margin-top:2px}
+@keyframes pisca{50%{background:#6e1212}}
+.pend{background:linear-gradient(180deg,#1b232c,#12181f);border:2px solid var(--c-metal2);border-radius:22px;padding:14px;box-shadow:0 10px 30px #0008}
+.pend-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700;letter-spacing:.06em;font-size:14px}
+.led{width:12px;height:12px;border-radius:50%;background:#4a5568;display:inline-block;margin-right:8px;box-shadow:0 0 0 2px #0006}
+.led.on{background:#2ee59d;box-shadow:0 0 10px #2ee59d}.led.stop{background:#ff4d4d;box-shadow:0 0 10px #ff4d4d}
+.seg{display:flex;gap:6px}.seg .btn{min-height:36px;padding:4px 12px;font-size:13px}
+.seg .btn[aria-pressed="true"]{background:var(--c-acc);border-color:var(--c-acc);color:#04140d}
+.scr{background:#040f0b;border:2px solid #0f3a2c;border-radius:10px;padding:10px;color:#7dffc8;font-size:13px;font-variant-numeric:tabular-nums}
+.scr-t{display:flex;justify-content:space-between;color:#4fcf9d;font-size:12px;letter-spacing:.08em}
+#sSt{margin:6px 0 8px;font-weight:700;min-height:1.3em;color:#7dffc8}#sSt.warn{color:#ffb020}#sSt.err{color:#ff6b6b}#sSt.ok{color:#59f0a8}
+.g6{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 8px}.g6 span{color:#4fcf9d}.g6 b{color:#eafff6;font-weight:500}
+.g6+.g6,.scr-g{margin-top:6px;padding-top:6px;border-top:1px solid #0f3a2c}
+.scr-g{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#4fcf9d}.scr-g b{color:#eafff6;font-weight:500}#sP{color:#59f0a8;font-weight:700}
+.rows{margin:10px 0 6px}
+.jr{display:grid;grid-template-columns:36px 1fr 56px 56px;gap:8px;align-items:center;padding:6px;border-radius:12px;border:1px solid transparent;margin-bottom:4px}
+.jr.sel{border-color:var(--c-acc);background:#123a2e}.jr>b{font-size:17px}
+.jm{min-width:0}.ang{font-size:15px;font-variant-numeric:tabular-nums}.jm small{color:var(--c-mut);margin-left:4px}
+.bar{position:relative;height:6px;background:#2d3a46;border-radius:3px;margin-top:8px}
+.bar i{position:absolute;top:-3px;width:6px;height:12px;border-radius:3px;background:var(--c-acc);margin-left:-3px}
+.jr.lim .bar i{background:#ffb020}
+.jb{min-height:54px;font-size:26px;padding:0;touch-action:none;-webkit-touch-callout:none}
+.jb:active{background:var(--c-acc);color:#04140d}
+.spd{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:14px}.spd input{flex:1;accent-color:#2ee6a6;min-height:32px}
+.ctl4{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ctl4 .btn{min-height:50px}
+.btn.on{background:#0f5a3f;border-color:#2ee59d;color:#b6ffe0}
+#bRst{grid-column:1/-1}
+.stop{grid-column:1/-1;min-height:58px!important;background:#b3201f!important;border-color:#ff6b6b!important;color:#fff!important;font-size:19px;letter-spacing:.12em}
+.pg{margin-top:12px;padding-top:10px;border-top:1px solid var(--c-metal)}
+.pg h3{font-size:14px;margin:0 0 8px;color:var(--c-mut)}.pg .row{display:flex;flex-wrap:wrap;gap:6px}
+.pg .btn{min-height:42px;padding:6px 12px;font-size:14px}
+#pts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:30px}
+#pts span{padding:3px 10px;border-radius:999px;background:#1c242d;border:1px solid var(--c-metal2);font-size:13px}#pts span.run{background:var(--c-acc);color:#04140d;border-color:var(--c-acc)}
+.miss{margin-top:16px;background:var(--c-surf);border:1px solid var(--c-metal);border-radius:16px;padding:14px}
+.miss h2{font-size:20px;margin:0 0 8px}
+#mChips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+#mChips button{min-width:44px;min-height:40px;padding:4px 10px}
+#mChips button[aria-current="true"]{border-color:var(--c-acc);color:var(--c-acc)}#mChips button.ok{background:#0b3d2a;border-color:#2ea372;color:#7ef2be}
+#mX{margin:0 0 8px}#mHint{display:none;background:#1c242d;border:1px dashed var(--c-metal2);border-radius:10px;padding:8px 12px;color:var(--c-mut);font-size:14px;margin:0 0 8px}
+#mL{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+#mL li{padding:4px 12px;border-radius:999px;border:1px solid var(--c-metal2);font-size:13px;color:var(--c-mut)}#mL li.ok{background:#0b3d2a;border-color:#2ea372;color:#7ef2be}
+#mFb{font-weight:700;color:#7ef2be;min-height:1.4em;margin:0 0 8px}
+.mact{display:flex;gap:8px;flex-wrap:wrap}.mact .btn{min-height:40px;padding:6px 14px;font-size:14px}
+@media(max-width:900px){.robo-grid{grid-template-columns:1fr}
+ .view{position:sticky;top:60px;z-index:5;height:auto;min-height:0;aspect-ratio:4/3.2}}
+@media (prefers-reduced-motion:reduce){#alarm{animation:none}}
+
+.lab-main{padding-top:14px}
+.free-msg{display:none;margin:0 0 6px;color:var(--c-mut)}
+#bCert{display:none}
+.miss-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}.miss-h h2{margin:0}
+</style>
+</head>
+<body>
+<div class="topo"><div class="marca"><b>Laboratório de Treinamento</b><small>Robótica industrial</small></div><div class="user"><span id="usr"></span><button class="btn sm" id="bAjuda" type="button">Como usar</button><button class="btn sm" id="sair" type="button">Sair</button></div></div>
+<main class="lab-main">
+<div class="boas"><h1 id="saud">Seja bem-vindo ao ambiente de laboratório de treinamento online.</h1><p id="coach"></p></div>
+<p class="aviso" role="note"><b>Simulador educacional.</b> Estes comandos não controlam nenhum equipamento físico. O robô é didático, inspirado na robótica industrial, e não reproduz um modelo específico.</p>
+<div class="robo-grid">
+  <section class="view" aria-label="Robô industrial em 3D">
+    <div id="cv"></div><div id="vMsg">Carregando o 3D…</div>
+    <div id="alarm" role="alert"><span id="alarmT">ALARME DE COLISÃO</span><small>O robô parou. Toque em HABILITAR para rearmar e afaste a ferramenta.</small></div>
+    <div class="hud"><button class="btn" data-v="pad" type="button">Câmera</button><button class="btn" data-v="frente" type="button">Frente</button><button class="btn" data-v="lado" type="button">Lado</button><button class="btn" data-v="topo" type="button">Topo</button><button class="btn" id="bLab" aria-pressed="true" type="button">Rótulos</button></div>
+    <div class="tip3d">Arraste para girar · pinça ou rolagem para zoom</div>
+  </section>
+  <aside class="pend" aria-label="Teach Pendant virtual">
+    <div class="pend-h"><span><i class="led" id="pLed"></i>TEACH PENDANT · TP-6</span>
+      <span class="seg" role="group" aria-label="Modo de movimento"><button class="btn" id="mJ" aria-pressed="true" type="button">Joint</button><button class="btn" id="mC" aria-pressed="false" type="button">Cartesian</button></span></div>
+    <div class="scr">
+      <div class="scr-t"><span id="sMode">MODO JOINT</span><span id="sEn">DESABILITADO</span></div>
+      <div id="sSt">PRESSIONE HABILITAR PARA MOVER</div>
+      <div class="g6"><span>A1 <b id="a0"></b></span><span>A2 <b id="a1"></b></span><span>A3 <b id="a2"></b></span><span>A4 <b id="a3"></b></span><span>A5 <b id="a4"></b></span><span>A6 <b id="a5"></b></span></div>
+      <div class="g6"><span>X <b id="cX"></b></span><span>Y <b id="cY"></b></span><span>Z <b id="cZ"></b></span><span>A <b id="cA"></b></span><span>B <b id="cB"></b></span><span>C <b id="cC"></b></span></div>
+      <div class="scr-g"><span>GARRA <b id="sG">ABERTA</b></span><span id="sP"></span></div>
+    </div>
+    <div class="rows" id="rows"></div>
+    <div class="spd"><label for="spd">Velocidade</label><input type="range" id="spd" min="5" max="100" value="40"><b id="spdV">40%</b></div>
+    <div class="ctl4">
+      <button class="btn" id="gOpen" type="button">ABRIR GARRA</button><button class="btn" id="gClose" type="button">FECHAR GARRA</button>
+      <button class="btn" id="bEn" type="button">HABILITAR</button><button class="btn" id="bHome" type="button">HOME</button>
+      <button class="btn" id="bRst" type="button">REINICIAR CÉLULA</button>
+      <button class="btn stop" id="bStop" type="button">STOP</button>
+    </div>
+    <div class="pg"><h3>Programa de pontos (posição + garra)</h3>
+      <div class="row"><button class="btn" id="bSave" type="button">Salvar ponto</button><button class="btn" id="bRun" type="button">Executar</button><button class="btn" id="bClr" type="button">Limpar</button><button class="btn" id="bPeca" type="button">Recolocar peça</button></div>
+      <div id="pts"></div></div>
+  </aside>
+</div>
+<section class="miss" aria-label="Missões">
+  <div class="miss-h"><h2 id="mH2">Missões</h2>
+    <div class="seg" role="group" aria-label="Modo de treinamento"><button class="btn" id="tMis" aria-pressed="true" type="button">Missões</button><button class="btn" id="tLiv" aria-pressed="false" type="button">Modo livre</button></div></div>
+  <p class="free-msg" id="freeMsg"></p>
+  <div id="misBody">
+    <div id="mChips"></div>
+    <h3 id="mT" style="margin:0 0 6px;font-size:17px"></h3><p id="mX"></p><p id="mHint"></p>
+    <ul id="mL"></ul><p id="mFb" role="status" aria-live="polite"></p>
+    <div class="mact"><button class="btn" id="mHb" type="button">Dica</button><button class="btn btn-primary" id="mNext" type="button" disabled>Próxima missão</button><button class="btn" id="bCert" type="button">Ver meu certificado</button></div>
+  </div>
+</section>
+</main>
+<footer class="rodape">Ambiente de treinamento desenvolvido por <b>Rudson Boaris</b> · © 2026 · Todos os direitos reservados.</footer>
+<div id="ajuda" role="dialog" aria-modal="true" aria-labelledby="ajudaT"><div class="ajuda-card"><div id="ajudaT"></div><div class="cert-act"><button class="btn btn-primary" id="ajudaOk" type="button">OK</button></div></div></div>
+<div id="cert" role="dialog" aria-modal="true" aria-labelledby="certT"><div class="cert-card">
+  <p class="k">CERTIFICADO DE CONCLUSÃO</p><h2 id="certT">Treinamento Online de Robótica Industrial</h2><p class="cur">Ambiente simulado de operação de robô de 6 eixos</p>
+  <p>Certificamos que</p><div class="nome" id="certNome"></div>
+  <p>concluiu com êxito as 8 missões do treinamento, operando o robô pelo Teach Pendant virtual: eixos, coordenadas, garra, programação de pontos e segurança.</p>
+  <p><b id="certData"></b></p><div class="sel" aria-hidden="true">✓</div>
+  <p class="ass">Ambiente de treinamento desenvolvido por Rudson Boaris · © 2026 · Todos os direitos reservados</p>
+  <div class="cert-act"><button class="btn btn-primary" id="certFechar" type="button">Fechar</button><button class="btn" id="certImp" type="button">Imprimir</button></div>
+</div></div>
+<script src="js/instrucoes.js"></script>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/vendor/OrbitControls.js"></script>
+<script src="js/robo-cinematica.js"></script>
+<script src="js/robo-modelo.js"></script>
+<script>
+const SES=JSON.parse(sessionStorage.getItem('treino')||'null')||{nome:'Participante',sobrenome:''},NOME=SES.nome,COMPLETO=(SES.nome+' '+SES.sobrenome).trim();
+let free=false,certShown=false,concluidoEm=null;
+const K=RoboCin,$=i=>document.getElementById(i),AX=['A1','A2','A3','A4','A5','A6'];
+let q=K.HOME.slice(),enabled=false,stopped=false,mode='joint',sel=0,speed=40,motion=null,prog=null,jog=null,ct=null,pts=[],progDone=false,mi=0,V=null;
+let grip=K.newGrip(),pc=K.newPiece(),alarm=false,alarmSeen=false,rearmed=false,colWarn='',grabbed=false,droppedOK=false,actx=null;
+const doneM=[0,0,0,0,0,0,0,0],seen=new Set(),mx=[0,0,0,0,0,0],cd=[0,0,0];let base={q:q.slice(),tcp:K.fk(q).tcp};
+let msg='PRESSIONE HABILITAR PARA MOVER',mk='';
+const setMsg=(t,k)=>{msg=t;mk=k||''};
+
+/* ---------- cena 3D (modelo em js/robo-modelo.js) ---------- */
+const S0=RoboModelo.cena({labels:true}),M=S0.model;
+function initView(){
+  const S=RoboModelo.render($('cv'),S0,{controls:true,pixelMax:2});
+  document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>S.setView(b.dataset.v));
+  $('bLab').onclick=e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',String(on));M.labels.forEach(s=>s.visible=on)};
+  V=S;$('vMsg').style.display='none';
+}
+function loadFail(e){$('vMsg').textContent='Não foi possível abrir o 3D neste navegador (WebGL). Atualize o Chrome ou tente outro aparelho. O Teach Pendant continua funcionando.';console.warn(e)}
+const updateModel=()=>RoboModelo.aplicar(M,q,grip.gw,pc);
+function beep(){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type='square';o.frequency.value=880;g.gain.value=.05;o.connect(g);g.connect(actx.destination);
+  const t=actx.currentTime;g.gain.setValueAtTime(.05,t);g.gain.setValueAtTime(0,t+.15);g.gain.setValueAtTime(.05,t+.3);g.gain.setValueAtTime(0,t+.45);o.start(t);o.stop(t+.5)}catch(e){}}
+
+/* ---------- movimento ---------- */
+function canMove(){if(!enabled){setMsg('PRESSIONE HABILITAR PARA MOVER','warn');return false}return true}
+function startJog(j){if(!canMove())return;if(motion||prog){setMsg('AGUARDE O MOVIMENTO TERMINAR','warn');return}
+  jog=j;if(mode==='cart'){const f=K.fk(q);ct={pos:f.tcp.slice(),R:f.R}}}
+function endJog(){if(jog){jog=null;ct=null;if(enabled)setMsg('PRONTO','')}}
+function jogStep(dt){
+  if(mode==='joint'){
+    const i=jog.axis,l=K.LIM[i],nq=q.slice();let v=q[i]+jog.dir*speed*.6*dt;
+    if(v>=l[1]||v<=l[0]){v=Math.max(l[0],Math.min(l[1],v));setMsg('LIMITE '+AX[i]+' ATINGIDO','warn')}else setMsg('MOVENDO '+AX[i],'');
+    if(Math.abs(v-q[i])<1e-9)return;nq[i]=v;
+    const e=K.check(nq);if(e&&e.indexOf('LIMITE')<0){setMsg(e,'err');return}q=nq;
+  }else{
+    const d=[0,0,0];d[jog.c]=jog.dir;const s=speed*2*dt,np=[ct.pos[0]+d[0]*s,ct.pos[1]+d[1]*s,ct.pos[2]+d[2]*s],r=K.ik(np,ct.R,q);
+    if(!r.q){setMsg(r.err,'warn');return}
+    let m=0;for(let k=0;k<6;k++)m=Math.max(m,Math.abs(r.q[k]-q[k]));
+    if(m>420*dt){setMsg('SINGULARIDADE: MOVIMENTO RECUSADO','warn');return}
+    const e=K.check(r.q);if(e){setMsg(e,e.indexOf('LIMITE')<0?'err':'warn');return}
+    ct.pos=np;q=r.q;setMsg('MOVENDO '+'XYZ'[jog.c]+(jog.dir>0?'+':'−'),'');
+  }
+}
+function startMotion(to,done){const m=Math.max(...to.map((v,i)=>Math.abs(v-q[i])));
+  if(m<.01){done&&done();return}motion={from:q.slice(),to:to.slice(),t:0,dur:Math.max(.5,m/(speed*1.5)),done};setMsg('EXECUTANDO MOVIMENTO','')}
+function triggerAlarm(pq,pgw,why){
+  q=pq;grip.gw=pgw;motion=null;prog=null;jog=null;ct=null;enabled=false;stopped=true;alarm=true;alarmSeen=true;
+  setMsg('ALARME: '+why,'err');$('alarmT').textContent='ALARME DE COLISÃO: '+why.replace('COLISÃO ','');$('alarm').classList.add('on');beep();coach('Atenção, '+NOME+': o robô parou por segurança. Toque em HABILITAR para rearmar e afaste a ferramenta.');renderPts()}
+function step(dt){
+  const pq=q.slice(),pgw=grip.gw;
+  if(motion){motion.t+=dt;const s=Math.min(1,motion.t/motion.dur),e=s*s*(3-2*s),m=motion;q=m.from.map((a,i)=>a+(m.to[i]-a)*e);if(s>=1){motion=null;m.done&&m.done()}}
+  else if(jog&&enabled)jogStep(dt);
+  if(enabled){const a0=pc.att;K.gripStep(grip,dt,pc,q);if(!a0&&pc.att)grabbed=true}
+  K.pieceStep(pc,dt);
+  const c=K.collide(q,grip.gw,pc);
+  if(c.level===2&&!alarm)triggerAlarm(pq,pgw,c.msg);else colWarn=c.level===1?c.msg:'';
+  droppedOK=grabbed&&!pc.att&&!pc.fall&&Math.hypot(pc.c[0]-K.PEC.dest[0],pc.c[1]-K.PEC.dest[1])<50&&Math.abs(pc.c[2]-K.PEC.dest[2])<1;
+  updateModel();track();
+}
+function stopAll(){motion=null;prog=null;jog=null;ct=null;enabled=false;stopped=true;setMsg('STOP: MOVIMENTO INTERROMPIDO','err');renderPts()}
+function toggleEnable(){
+  if(enabled){motion=null;prog=null;jog=null;ct=null;enabled=false;setMsg('MOVIMENTO DESABILITADO','')}
+  else{enabled=true;stopped=false;if(alarm){alarm=false;rearmed=true;$('alarm').classList.remove('on');setMsg('ALARME REARMADO: AFASTE A FERRAMENTA','ok');coach('Tudo certo, '+NOME+'. Agora afaste a ferramenta com cuidado.')}else setMsg('MOVIMENTO HABILITADO','ok')}
+  renderPts()}
+function goHome(){if(!canMove())return;if(motion||prog)return;startMotion(K.HOME,()=>setMsg('HOME ATINGIDO','ok'))}
+function resetPos(){motion=null;prog=null;jog=null;ct=null;q=K.HOME.slice();grip=K.newGrip();pc=K.newPiece();alarm=false;$('alarm').classList.remove('on');setMsg('CÉLULA REINICIADA','ok');renderPts();updateModel()}
+function gripCmd(v){if(!canMove())return;if(motion||prog){setMsg('AGUARDE O MOVIMENTO TERMINAR','warn');return}K.setGrip(grip,v,pc,q);setMsg(v?'FECHANDO A GARRA':'ABRINDO A GARRA','')}
+/* programa de pontos: cada ponto guarda a posição e o estado da garra */
+function savePoint(){if(pts.length>=10){setMsg('LIMITE DE 10 PONTOS','warn');return}pts.push({q:q.slice(),g:grip.tgt});setMsg('PONTO P'+pts.length+' SALVO (GARRA '+(grip.tgt?'FECHADA':'ABERTA')+')','ok');renderPts()}
+function clearPts(){pts=[];prog=null;progDone=false;renderPts();setMsg('PONTOS APAGADOS','')}
+function runProg(){if(!pts.length){setMsg('GRAVE PELO MENOS UM PONTO','warn');return}if(!canMove()||motion||prog)return;progDone=false;prog={i:0};nextPoint()}
+function nextPoint(){if(!prog)return;
+  if(prog.i>=pts.length){prog=null;progDone=true;setMsg('PROGRAMA CONCLUÍDO','ok');renderPts();return}
+  const i=prog.i++;renderPts();setMsg('EXECUTANDO P'+(i+1),'');
+  startMotion(pts[i].q,()=>{const ch=pts[i].g!==grip.tgt;if(ch)K.setGrip(grip,pts[i].g,pc,q);motion={from:q.slice(),to:q.slice(),t:0,dur:ch?1:.35,done:nextPoint}})}
+function renderPts(){$('pts').innerHTML=pts.length?pts.map((p,i)=>'<span class="'+(prog&&prog.i-1===i?'run':'')+'">P'+(i+1)+' · '+(p.g?'fechada':'aberta')+'</span>').join(''):'<small style="color:var(--c-mut)">Nenhum ponto salvo. Mova o robô, ajuste a garra e toque em Salvar ponto.</small>'}
+
+/* ---------- Teach Pendant ---------- */
+function buildRows(){
+  const R=$('rows');R.innerHTML='';
+  (mode==='joint'?AX:['X','Y','Z']).forEach((n,i)=>{const r=document.createElement('div');r.className='jr';r.dataset.i=i;
+    r.innerHTML='<b>'+n+'</b><div class="jm"><span class="ang"></span>'+(mode==='joint'?'<div class="bar"><i></i></div>':'<small>mm</small>')+'</div>'+
+      '<button type="button" class="btn jb" data-d="-1" aria-label="'+n+' negativo">−</button><button type="button" class="btn jb" data-d="1" aria-label="'+n+' positivo">+</button>';R.appendChild(r)});
+  markSel();
+}
+function markSel(){document.querySelectorAll('#rows .jr').forEach((r,i)=>r.classList.toggle('sel',mode==='joint'&&i===sel));M.rings.forEach((r,i)=>r.visible=mode==='joint'&&i===sel)}
+function setMode(m){endJog();mode=m;$('mJ').setAttribute('aria-pressed',String(m==='joint'));$('mC').setAttribute('aria-pressed',String(m==='cart'));buildRows();ui()}
+const f1=(x,d)=>x.toFixed(d===undefined?1:d).replace('.',',');
+function ui(){
+  const f=K.fk(q),t=f.tcp,o=K.abc(f.R);
+  $('sMode').textContent=mode==='joint'?'MODO JOINT':'MODO CARTESIAN';
+  $('sEn').textContent=alarm?'ALARME':enabled?'HABILITADO':(stopped?'STOP':'DESABILITADO');
+  $('pLed').className='led'+(enabled?' on':(stopped||alarm)?' stop':'');$('bEn').classList.toggle('on',enabled);$('bEn').textContent=enabled?'HABILITADO ✓':'HABILITAR';
+  const st=$('sSt'),warn=!alarm&&colWarn&&mk!=='err';st.textContent=warn?'ATENÇÃO: '+colWarn:msg;st.className=warn?'warn':mk;
+  q.forEach((v,i)=>$('a'+i).textContent=f1(v)+'°');
+  $('cX').textContent=f1(t[0]);$('cY').textContent=f1(t[1]);$('cZ').textContent=f1(t[2]);$('cA').textContent=f1(o[0]);$('cB').textContent=f1(o[1]);$('cC').textContent=f1(o[2]);
+  $('sG').textContent=pc.att?'PEÇA PRESA':grip.tgt?(grip.gw>K.GRIP.empty+.1?'FECHANDO':'FECHADA'):(grip.gw<K.GRIP.open-.1?'ABRINDO':'ABERTA');
+  $('sP').textContent=K.graspReady(q,pc)?'PEÇA ALINHADA: PODE FECHAR':'';
+  document.querySelectorAll('#rows .jr').forEach((r,i)=>{
+    if(mode==='joint'){const l=K.LIM[i];r.querySelector('.ang').textContent=f1(q[i])+'°';
+      r.querySelector('.bar i').style.left=((q[i]-l[0])/(l[1]-l[0])*100)+'%';r.classList.toggle('lim',q[i]<=l[0]+1||q[i]>=l[1]-1)}
+    else r.querySelector('.ang').textContent=f1(t[i])});
+  $('spdV').textContent=speed+'%';missionUI();certCheck();
+}
+
+/* ---------- missões ---------- */
+const MS=[
+ {t:'Missão 01: Conhecendo os seis eixos',x:'Um robô industrial tem 6 eixos, de A1 (na base) até A6 (no flange). Toque em cada eixo no Teach Pendant: o anel azul no robô mostra qual é.',h:'A1 gira a base. A2 e A3 levantam e dobram o braço. A4, A5 e A6 orientam o punho, onde fica a ferramenta.',
+  c:()=>AX.map((a,i)=>[a,seen.has(i)])},
+ {t:'Missão 02: Movimentando A1, A2 e A3',x:'Toque em HABILITAR. Depois segure + ou − em A1, A2 e A3, movendo cada um pelo menos 20°. Ao soltar, o eixo para.',h:'A1 gira o robô todo. A2 inclina o braço para frente e para trás. A3 dobra o cotovelo.',
+  c:()=>[0,1,2].map(i=>[AX[i]+' 20°',mx[i]>=20])},
+ {t:'Missão 03: Movimentando A4, A5 e A6',x:'Agora o punho: mova A4, A5 e A6 pelo menos 20° cada.',h:'A4 gira o antebraço, A5 inclina o punho e A6 gira a ferramenta. Cuide dos limites: a barra do eixo fica amarela perto do fim.',
+  c:()=>[3,4,5].map(i=>[AX[i]+' 20°',mx[i]>=20])},
+ {t:'Missão 04: Conhecendo as coordenadas X, Y e Z',x:'Mude para o modo Cartesian e mova a ferramenta pelo menos 80 mm em X, em Y e em Z. Veja os números mudarem na tela.',h:'X vai para a frente do robô, Y para a esquerda e Z para cima. No modo Cartesian a ferramenta anda em linha reta e mantém a orientação.',
+  c:()=>['X','Y','Z'].map((n,i)=>[n+' 80 mm',cd[i]>=80])},
+ {t:'Missão 05: Levando a ferramenta a uma posição',x:'Leve a ponta da ferramenta até a esfera verde: X 600, Y 150, Z 600 (tolerância de 20 mm).',h:'Use o modo Cartesian. Aproxime um eixo de cada vez e confira X, Y e Z na tela.',
+  c:()=>{const t=K.fk(q).tcp,d=Math.hypot(t[0]-600,t[1]-150,t[2]-600);return[['Distância do alvo: '+Math.round(d)+' mm',d<=20]]}},
+ {t:'Missão 06: Gravando pontos e executando uma sequência',x:'Mova o robô, toque em Salvar ponto (P1). Repita para P2 e P3, em posições diferentes. Cada ponto guarda também se a garra está aberta ou fechada. Depois toque em Executar.',h:'O robô vai de ponto em ponto com movimento suave. Para parar a qualquer momento, use STOP.',
+  c:()=>[['3 pontos salvos',pts.length>=3],['Sequência executada',progDone]]},
+ {t:'Missão 07: Pegando e levando a peça',x:'Leve a garra, aberta, até a peça azul, com a ferramenta apontando para baixo. Quando aparecer "PEÇA ALINHADA", toque em FECHAR GARRA. Leve a peça até a área verde da bancada e toque em ABRIR GARRA.',h:'No modo Cartesian, use Z− para descer devagar. A peça brilha em verde quando a garra está bem posicionada. Para fazer isso sozinho, grave os pontos com a garra aberta e fechada e toque em Executar.',
+  c:()=>[['Peça pega',grabbed],['Peça solta na área verde',droppedOK]]},
+ {t:'Missão 08: Segurança e alarme de colisão',x:'Um robô de verdade para quando chega perto demais de algo. Habilite o robô, vá para cima da bancada (X+ e Y+) e desça com Z− até o alarme de colisão disparar. Depois toque em HABILITAR para rearmar.',h:'A bancada fica à frente e à esquerda do robô. O alarme dispara a poucos milímetros do tampo. O aviso amarelo "perto da bancada" aparece antes, a 30 mm.',
+  c:()=>[['Alarme disparou',alarmSeen],['Rearmado com HABILITAR',rearmed]]}];
+function track(){for(let i=0;i<6;i++)mx[i]=Math.max(mx[i],Math.abs(q[i]-base.q[i]));const t=K.fk(q).tcp;for(let i=0;i<3;i++)cd[i]=Math.max(cd[i],Math.abs(t[i]-base.tcp[i]))}
+function pickMission(i){mi=i;seen.clear();mx.fill(0);cd.fill(0);base={q:q.slice(),tcp:K.fk(q).tcp.slice()};progDone=false;grabbed=false;alarmSeen=false;rearmed=false;
+  if(i===6){pc=K.newPiece();grip.tgt=0}
+  $('mHint').style.display='none';M.target.visible=i===4&&!free;if(!free)coach(NOME+', próxima etapa: '+MS[i].t+'.');ui()}
+function missionUI(){
+  if(free)return;
+  const m=MS[mi],c=m.c(),ok=c.every(x=>x[1]);if(ok&&!doneM[mi]){doneM[mi]=1;coach('Muito bem, '+NOME+'! '+m.t.split(':')[0]+' concluída.')}
+  $('mT').textContent=m.t;$('mX').textContent=m.x;$('mHint').textContent=m.h;
+  $('mL').innerHTML=c.map(x=>'<li class="'+(x[1]?'ok':'')+'">'+(x[1]?'✓ ':'○ ')+x[0]+'</li>').join('');
+  $('mFb').textContent=doneM[mi]?(mi<MS.length-1?'Missão concluída, '+NOME+'! Muito bem.':'Missão concluída, '+NOME+'! Você operou o robô do começo ao fim.'):'';
+  $('mNext').disabled=!doneM[mi]||mi>=MS.length-1;
+  $('mChips').innerHTML=MS.map((_,i)=>'<button type="button" class="btn sm'+(doneM[i]?' ok':'')+'" data-m="'+i+'" aria-current="'+(i===mi)+'" aria-label="Missão '+(i+1)+(doneM[i]?' concluída':'')+'">'+(doneM[i]?'✓ ':'')+(i+1)+'</button>').join('');
+}
+
+/* ---------- ligações ---------- */
+const rows=$('rows');
+rows.addEventListener('pointerdown',e=>{const r=e.target.closest('.jr'),b=e.target.closest('.jb');if(!r)return;const i=+r.dataset.i;
+  if(mode==='joint'){sel=i;seen.add(i);markSel()}
+  if(!b)return;b.setPointerCapture&&b.setPointerCapture(e.pointerId);e.preventDefault();
+  startJog(mode==='joint'?{axis:i,dir:+b.dataset.d}:{c:i,dir:+b.dataset.d})});
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>rows.addEventListener(t,endJog));
+window.addEventListener('blur',endJog);
+$('mJ').onclick=()=>setMode('joint');$('mC').onclick=()=>setMode('cart');
+$('spd').oninput=e=>{speed=+e.target.value};
+$('bEn').onclick=toggleEnable;$('bHome').onclick=goHome;$('bRst').onclick=resetPos;$('bStop').onclick=stopAll;
+$('gOpen').onclick=()=>gripCmd(0);$('gClose').onclick=()=>gripCmd(1);
+$('bSave').onclick=savePoint;$('bRun').onclick=runProg;$('bClr').onclick=clearPts;$('bPeca').onclick=()=>{pc=K.newPiece();setMsg('PEÇA RECOLOCADA','ok')};
+$('mHb').onclick=()=>{const h=$('mHint');h.style.display=h.style.display==='block'?'none':'block'};
+$('mNext').onclick=()=>pickMission(Math.min(MS.length-1,mi+1));
+$('mChips').onclick=e=>{const b=e.target.closest('[data-m]');if(b)pickMission(+b.dataset.m)};
+document.querySelector('.pend').addEventListener('contextmenu',e=>e.preventDefault());
+
+/* ---------- boas-vindas, modo livre e certificado ---------- */
+function coach(t){$('coach').textContent=t}
+function setFree(v){free=v;$('tMis').setAttribute('aria-pressed',String(!v));$('tLiv').setAttribute('aria-pressed',String(v));
+  $('misBody').style.display=v?'none':'';$('freeMsg').style.display=v?'block':'none';
+  $('freeMsg').textContent=NOME+', no modo livre você opera o robô como quiser. A peça e a bancada continuam ativas.';
+  M.target.visible=!v&&mi===4;coach(v?NOME+', modo livre ativado. Explore à vontade.':NOME+', de volta às missões.');ui()}
+const dataHora=d=>d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+function certCheck(){const all=doneM.every(Boolean);$('bCert').style.display=all?'inline-flex':'none';
+  if(!free&&!certShown&&all){certShown=true;concluidoEm=new Date();showCert()}}
+function showCert(){$('certNome').textContent=COMPLETO;$('certData').textContent=dataHora(concluidoEm||new Date());$('cert').classList.add('on');$('certFechar').focus()}
+$('bCert').onclick=showCert;$('certFechar').onclick=()=>$('cert').classList.remove('on');$('certImp').onclick=()=>window.print();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('cert').classList.remove('on');$('ajuda').classList.remove('on')}});
+$('bAjuda').onclick=()=>{$('ajudaT').innerHTML=INSTRUCOES(NOME);$('ajuda').classList.add('on');$('ajudaOk').focus()};$('ajudaOk').onclick=()=>$('ajuda').classList.remove('on');
+$('tMis').onclick=()=>setFree(false);$('tLiv').onclick=()=>setFree(true);
+$('saud').textContent=NOME+', seja bem-vindo ao ambiente de laboratório de treinamento online.';$('usr').textContent=COMPLETO;
+$('sair').onclick=()=>{sessionStorage.removeItem('treino');location.href='index.html'};
+try{initView()}catch(e){loadFail(e);V=null}
+buildRows();renderPts();pickMission(0);updateModel();coach(NOME+', siga as missões abaixo ou use o modo livre. Comece pela Missão 01.');
+let last=performance.now(),acc=0;
+function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;step(dt);acc+=dt;if(acc>.08){acc=0;ui()}if(V)V.render();requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

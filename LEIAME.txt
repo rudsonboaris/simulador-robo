@@ -1,0 +1,21 @@
+LABORATÓRIO DE TREINAMENTO ONLINE | Robótica industrial
+Desenvolvido por Rudson Boaris. Todos os direitos reservados.
+
+FLUXO: a tela inicial é uma conversa com um assistente (pergunta o nome, depois o sobrenome, registra a participação e mostra as instruções
+com um botão OK). Depois a pessoa entra no treinamento, onde é chamada pelo nome. O botão "Como usar" reabre as instruções.
+
+COMO ABRIR NO COMPUTADOR: extraia o ZIP e dê dois cliques em index.html (Google Chrome).
+Sem a planilha configurada, o treinamento funciona normalmente; só não registra as entradas.
+
+PLANILHA DO GOOGLE (registro de Data, Hora, Nome e Sobrenome):
+1) Crie uma planilha no Google Planilhas.
+2) Extensões > Apps Script. Apague o código de exemplo e cole o conteúdo de apps-script/Codigo.gs. Salve.
+3) Implantar > Nova implantação > tipo "Aplicativo da Web". Executar como: Eu. Quem tem acesso: Qualquer pessoa. Implantar e autorizar.
+4) Copie o endereço que termina em /exec e cole em js/config.js, no campo urlPlanilha.
+Atenção: quem tiver esse endereço consegue enviar registros. Os nomes são digitados pela pessoa e não são verificados.
+
+PUBLICAÇÃO NO GITHUB PAGES: crie um repositório público, envie todo o conteúdo desta pasta, e em Settings > Pages escolha
+"Deploy from a branch", branch main, pasta / (root).
+
+A biblioteca 3D (Three.js, licença MIT) está em js/vendor/ e não depende de internet. A fonte do título usa o Google Fonts.
+Simulador educacional: não controla equipamentos físicos.
