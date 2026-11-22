@@ -7,11 +7,11 @@ com um botão OK). Depois a pessoa entra no treinamento, onde é chamada pelo no
 COMO ABRIR NO COMPUTADOR: extraia o ZIP e dê dois cliques em index.html (Google Chrome).
 Sem a planilha configurada, o treinamento funciona normalmente; só não registra as entradas.
 
-PLANILHA DO GOOGLE (registro de Data, Hora, Nome e Sobrenome):
-1) Crie uma planilha no Google Planilhas.
-2) Extensões > Apps Script. Apague o código de exemplo e cole o conteúdo de apps-script/Codigo.gs. Salve.
-3) Implantar > Nova implantação > tipo "Aplicativo da Web". Executar como: Eu. Quem tem acesso: Qualquer pessoa. Implantar e autorizar.
-4) Copie o endereço que termina em /exec e cole em js/config.js, no campo urlPlanilha.
+PLANILHA DO GOOGLE (registro de Nome, Sobrenome e Data e Hora, nas colunas A, B e C da primeira aba):
+1) Na planilha: Extensões > Apps Script. Apague o código de exemplo e cole o conteúdo de apps-script/Codigo.gs. Salve.
+2) Implantar > Nova implantação > tipo "Aplicativo da Web". Executar como: Eu. Quem tem acesso: Qualquer pessoa.
+   Para trocar o código depois: Implantar > Gerenciar implantações > lápis > Versão: Nova versão > Implantar (o endereço continua o mesmo).
+3) O endereço que termina em /exec já está em js/config.js (urlPlanilha).
 Atenção: quem tiver esse endereço consegue enviar registros. Os nomes são digitados pela pessoa e não são verificados.
 
 PUBLICAÇÃO NO GITHUB PAGES: crie um repositório público, envie todo o conteúdo desta pasta, e em Settings > Pages escolha

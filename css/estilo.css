@@ -76,3 +76,7 @@ h1,h2,h3{line-height:1.15;margin:0 0 .5em;letter-spacing:.02em}
 .ajuda-card{width:min(560px,100%);background:var(--c-surf);border:1px solid var(--c-acc);border-radius:16px;padding:20px}
 .ajuda-card .passos{padding-left:20px}.ajuda-card .passos li{margin-bottom:8px}
 @media (prefers-reduced-motion:reduce){.b,.dig span{animation:none}}
+
+.nota{display:block;color:var(--c-mut);font-size:13px;margin:0 0 12px}
+.miss-h .nota{margin:2px 0 0}
+.b .nota{margin:10px 0 0}

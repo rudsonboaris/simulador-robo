@@ -15,6 +15,7 @@
   <section>
     <p class="selo">Laboratório de treinamento online</p>
     <h1>Simulador de robô <em>industrial</em></h1>
+    <p class="nota">Ao concluir as 8 missões do treinamento, você recebe um certificado de conclusão.</p>
     <div class="chat-box">
       <div class="chat-h"><i></i><span>Assistente de treinamento</span></div>
       <div id="chat" role="log" aria-live="polite"></div>
@@ -55,6 +56,7 @@
     if (!url) { console.warn('urlPlanilha não configurada: a entrada não foi enviada.'); return; }
     fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(dados), keepalive: true }).catch(function () {});
   }
+  function agoraSP() { var m = new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2}:\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1] + ' ' + m[4] : ''; }
   function pronto(ph) { inp.disabled = false; env.disabled = false; inp.placeholder = ph; inp.value = ''; inp.focus(); }
   var passo = 0, nome = '', sobrenome = '';
   ia('Olá! Seja bem-vindo ao <b>simulador de robô industrial</b>.')
@@ -71,7 +73,7 @@
       if (!OK.test(v)) { bolha('ia', 'Não consegui entender. Pode digitar o seu sobrenome, usando letras?'); inp.focus(); return; }
       sobrenome = v; passo = 2; inp.disabled = env.disabled = true; bolha('eu', esc(sobrenome));
       sessionStorage.setItem('treino', JSON.stringify({ nome: nome, sobrenome: sobrenome, entrada: new Date().toISOString() }));
-      enviar({ nome: nome, sobrenome: sobrenome });
+      enviar({ nome: nome, sobrenome: sobrenome, dataHora: agoraSP() });
       ia('Pronto, ' + esc(nome) + '. Sua participação foi registrada.').then(function () { return ia(window.INSTRUCOES(nome)); })
         .then(function () { f.style.display = 'none'; ok.style.display = 'block'; ok.focus(); });
     }
